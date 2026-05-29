@@ -1005,40 +1005,35 @@
                                 <li>针对优秀案例录制销售复盘视频，全员学习。</li>
                             </ul>
                         </div>
-                        <div style="font-size:12px;color:#636e72;margin-bottom:10px;font-weight:600;">各导购详细效能数据</div>
-                        <div style="overflow-x:auto;">
-                        <table class="salesperson-table" style="min-width:900px;">
-                            <thead><tr>
-                                <th style="width:4%;text-align:center;">排名</th>
-                                <th style="width:7%;">姓名</th>
-                                <th style="width:9%;">销售额</th>
-                                <th style="width:6%;">小票</th>
-                                <th style="width:7%;">客单价</th>
-                                <th style="width:7%;">连带率</th>
-                                <th style="width:7%;">折扣率</th>
-                                <th style="width:8%;">新品占比</th>
-                                <th style="width:8%;">老品占比</th>
-                                <th style="width:17%;">核心优势</th>
-                                <th style="width:17%;">存在不足</th>
-                                <th>改进方法</th>
-                            </tr></thead>
-                            <tbody>
-                                <tr v-for="(sp, idx) in salespersonData" :key="idx">
-                                    <td style="text-align:center;"><span style="font-weight:bold;color:#ff6b00;">{{ idx + 1 }}</span></td>
-                                    <td style="font-weight:600;">{{ sp.name }}</td>
-                                    <td>¥{{ formatNumber(sp.total_amount) }}</td>
-                                    <td style="text-align:center;">{{ sp.tickets }}</td>
-                                    <td>¥{{ sp.avg_price.toFixed(0) }}</td>
-                                    <td>{{ sp.attachment.toFixed(2) }}</td>
-                                    <td :style="{color: sp.discount > 0.85 ? '#d63031' : sp.discount < 0.7 ? '#00b894' : '#636e72'}">{{ sp.discount > 0 ? (sp.discount * 100).toFixed(1) + '%' : '-' }}</td>
-                                    <td :style="{color: sp.new_ratio > 0.5 ? '#00b894' : sp.new_ratio < 0.3 ? '#d63031' : '#636e72'}">{{ (sp.new_ratio * 100).toFixed(0) }}%</td>
-                                    <td :style="{color: sp.old_ratio > 0.5 ? '#d63031' : '#636e72'}">{{ (sp.old_ratio * 100).toFixed(0) }}%</td>
-                                    <td class="advantage-text">{{ sp.advantage }}</td>
-                                    <td class="weakness-text">{{ sp.weakness }}</td>
-                                    <td class="method-text">{{ sp.improvement }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div style="font-size:12px;color:#636e72;margin-bottom:10px;font-weight:600;">各导购详细效能分析</div>
+                        <div v-for="(sp, idx) in salespersonData" :key="idx" style="background:linear-gradient(135deg,#fff9f0,#fff5e6);border:2px solid #ffe0b2;border-radius:10px;padding:12px 15px;margin-bottom:10px;">
+                            <!-- 第一行：排名+姓名+核心指标 -->
+                            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+                                <span style="background:linear-gradient(135deg,#ff9500,#ff6b00);color:white;font-weight:700;font-size:14px;width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;">{{ idx + 1 }}</span>
+                                <span style="font-weight:700;font-size:15px;color:#2d3436;">{{ sp.name }}</span>
+                                <span style="background:#ff6b00;color:white;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;">¥{{ formatNumber(sp.total_amount) }}</span>
+                                <span style="color:#636e72;font-size:12px;">小票 <b>{{ sp.tickets }}</b></span>
+                                <span style="color:#636e72;font-size:12px;">客单价 <b>¥{{ sp.avg_price.toFixed(0) }}</b></span>
+                                <span style="color:#636e72;font-size:12px;">连带率 <b :style="{color: sp.attachment >= 1.5 ? '#00b894' : sp.attachment < 1.2 ? '#d63031' : '#2d3436'}">{{ sp.attachment.toFixed(2) }}</b></span>
+                                <span style="color:#636e72;font-size:12px;">折扣率 <b :style="{color: sp.discount > 0.85 ? '#d63031' : sp.discount < 0.7 ? '#00b894' : '#2d3436'}">{{ sp.discount > 0 ? (sp.discount * 100).toFixed(1) + '%' : '-' }}</b></span>
+                                <span style="color:#636e72;font-size:12px;">新品 <b :style="{color: sp.new_ratio > 0.5 ? '#00b894' : sp.new_ratio < 0.3 ? '#d63031' : '#2d3436'}">{{ (sp.new_ratio * 100).toFixed(0) }}%</b></span>
+                                <span style="color:#636e72;font-size:12px;">老品 <b :style="{color: sp.old_ratio > 0.5 ? '#d63031' : '#2d3436'}">{{ (sp.old_ratio * 100).toFixed(0) }}%</b></span>
+                            </div>
+                            <!-- 第二行：核心优势 -->
+                            <div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px;font-size:12px;line-height:1.5;">
+                                <span style="color:#00b894;font-weight:600;white-space:nowrap;">✅ 核心优势</span>
+                                <span style="color:#2d3436;">{{ sp.advantage }}</span>
+                            </div>
+                            <!-- 第三行：存在不足 -->
+                            <div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px;font-size:12px;line-height:1.5;">
+                                <span style="color:#d63031;font-weight:600;white-space:nowrap;">⚠️ 存在不足</span>
+                                <span style="color:#2d3436;">{{ sp.weakness }}</span>
+                            </div>
+                            <!-- 第四行：改进建议 -->
+                            <div style="display:flex;align-items:flex-start;gap:6px;font-size:12px;line-height:1.5;">
+                                <span style="color:#6c5ce7;font-weight:600;white-space:nowrap;">💡 改进建议</span>
+                                <span style="color:#2d3436;">{{ sp.improvement }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
