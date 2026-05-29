@@ -2599,6 +2599,9 @@
                     '雅邑': '墨江县', '龙坝': '墨江县', '孟弄': '墨江县'
                 };
                 
+                // 县区真实人口GDP数据（回退到上级市时用县区自己的数据覆盖）
+                const countyRealData = {"五华区":{"population":118,"gdp":1438},"盘龙区":{"population":103,"gdp":1212},"西山区":{"population":98,"gdp":1140},"东川区":{"population":29,"gdp":142},"呈贡区":{"population":73,"gdp":580},"富民县":{"population":15,"gdp":112},"宜良县":{"population":39,"gdp":228},"石林县":{"population":24,"gdp":128},"嵩明县":{"population":34,"gdp":195},"禄劝县":{"population":39,"gdp":150},"寻甸县":{"population":43,"gdp":162},"安宁市":{"population":49,"gdp":720},"宁洱县":{"population":16,"gdp":84},"墨江县":{"population":27,"gdp":120},"景东县":{"population":29,"gdp":130},"景谷县":{"population":27,"gdp":160},"镇沅县":{"population":17,"gdp":94},"江城县":{"population":10,"gdp":70},"孟连县":{"population":14,"gdp":68},"西盟县":{"population":9,"gdp":35},"大理市":{"population":78,"gdp":580},"漾濞县":{"population":8,"gdp":38},"祥云县":{"population":42,"gdp":248},"宾川县":{"population":30,"gdp":172},"弥渡县":{"population":28,"gdp":118},"南涧县":{"population":19,"gdp":82},"巍山县":{"population":27,"gdp":105},"永平县":{"population":15,"gdp":68},"云龙县":{"population":18,"gdp":89},"洱源县":{"population":24,"gdp":96},"剑川县":{"population":16,"gdp":65},"鹤庆县":{"population":23,"gdp":112},"古城区":{"population":24,"gdp":205},"玉龙县":{"population":20,"gdp":108},"永胜县":{"population":34,"gdp":128},"华坪县":{"population":15,"gdp":78},"宁蒗县":{"population":22,"gdp":68},"麒麟区":{"population":78,"gdp":920},"沾益区":{"population":42,"gdp":320},"马龙区":{"population":17,"gdp":108},"陆良县":{"population":55,"gdp":258},"师宗县":{"population":34,"gdp":186},"罗平县":{"population":49,"gdp":268},"富源县":{"population":62,"gdp":328},"会泽县":{"population":82,"gdp":285},"宣威市":{"population":115,"gdp":460},"红塔区":{"population":55,"gdp":920},"江川区":{"population":25,"gdp":185},"澄江市":{"population":19,"gdp":175},"通海县":{"population":25,"gdp":148},"华宁县":{"population":19,"gdp":112},"易门县":{"population":15,"gdp":135},"新平县":{"population":25,"gdp":209},"隆阳区":{"population":80,"gdp":420},"施甸县":{"population":27,"gdp":102},"腾冲市":{"population":62,"gdp":338},"龙陵县":{"population":25,"gdp":115},"昌宁县":{"population":29,"gdp":138},"昭阳区":{"population":92,"gdp":425},"鲁甸县":{"population":38,"gdp":98},"巧家县":{"population":48,"gdp":115},"盐津县":{"population":30,"gdp":58},"大关县":{"population":22,"gdp":42},"永善县":{"population":33,"gdp":95},"绥江县":{"population":13,"gdp":38},"镇雄县":{"population":130,"gdp":258},"彝良县":{"population":49,"gdp":82},"威信县":{"population":33,"gdp":117},"水富市":{"population":10,"gdp":122},"楚雄市":{"population":61,"gdp":708},"双柏县":{"population":13,"gdp":95},"牟定县":{"population":14,"gdp":117},"南华县":{"population":20,"gdp":147},"姚安县":{"population":16,"gdp":119},"大姚县":{"population":22,"gdp":167},"永仁县":{"population":9,"gdp":82},"元谋县":{"population":19,"gdp":150},"武定县":{"population":23,"gdp":156},"禄丰市":{"population":35,"gdp":280},"蒙自市":{"population":60,"gdp":485},"个旧市":{"population":41,"gdp":415},"开远市":{"population":32,"gdp":334},"弥勒市":{"population":53,"gdp":559},"屏边县":{"population":12,"gdp":78},"建水县":{"population":52,"gdp":269},"石屏县":{"population":26,"gdp":154},"泸西县":{"population":37,"gdp":186},"元阳县":{"population":34,"gdp":107},"红河县":{"population":27,"gdp":90},"金平县":{"population":32,"gdp":101},"绿春县":{"population":20,"gdp":64},"河口县":{"population":10,"gdp":145},"文山市":{"population":62,"gdp":409},"砚山县":{"population":46,"gdp":296},"西畴县":{"population":19,"gdp":73},"麻栗坡县":{"population":23,"gdp":111},"马关县":{"population":30,"gdp":143},"丘北县":{"population":44,"gdp":137},"广南县":{"population":70,"gdp":195},"富宁县":{"population":39,"gdp":174},"景洪市":{"population":67,"gdp":453},"勐海县":{"population":36,"gdp":234},"勐腊县":{"population":31,"gdp":215},"芒市":{"population":46,"gdp":204},"梁河县":{"population":14,"gdp":48},"盈江县":{"population":31,"gdp":139},"陇川县":{"population":19,"gdp":79},"瑞丽市":{"population":23,"gdp":150},"泸水市":{"population":20,"gdp":111},"福贡县":{"population":11,"gdp":34},"贡山县":{"population":4,"gdp":25},"兰坪县":{"population":19,"gdp":110},"香格里拉市":{"population":19,"gdp":186},"德钦县":{"population":8,"gdp":60},"维西县":{"population":13,"gdp":61},"凤庆县":{"population":38,"gdp":192},"云县":{"population":38,"gdp":180},"永德县":{"population":32,"gdp":135},"镇康县":{"population":16,"gdp":90},"双江县":{"population":16,"gdp":95},"耿马县":{"population":28,"gdp":163},"沧源县":{"population":15,"gdp":74}};
+                
                 // 当前城市的市场数据
                 const cityMarketData = computed(() => {
                     let city = currentCity.value;
@@ -2606,13 +2609,25 @@
                     
                     // 1. 直接匹配
                     if (yunnanCityData[city]) {
-                        return { ...yunnanCityData[city], _source: 'direct', _displayName: city };
+                        const data = { ...yunnanCityData[city], _source: 'direct', _displayName: city };
+                        // 如果县区有独立真实数据，覆盖人口和GDP
+                        if (countyRealData[city]) {
+                            data.population = countyRealData[city].population;
+                            data.gdp = countyRealData[city].gdp;
+                        }
+                        return data;
                     }
                     
-                    // 2. 通过县→市映射回退
+                    // 2. 通过县→市映射回退（用上级市的数据框架，但覆盖人口GDP）
                     const parentCity = countyToParentCity[city];
                     if (parentCity && yunnanCityData[parentCity]) {
-                        return { ...yunnanCityData[parentCity], _source: 'fallback', _displayName: city, _parentCity: parentCity };
+                        const data = { ...yunnanCityData[parentCity], _source: 'fallback', _displayName: city, _parentCity: parentCity };
+                        // 用县区真实数据覆盖市的人口和GDP
+                        if (countyRealData[city]) {
+                            data.population = countyRealData[city].population;
+                            data.gdp = countyRealData[city].gdp;
+                        }
+                        return data;
                     }
                     
                     // 3. 模糊匹配（去掉"县""市""区"后匹配）
@@ -2621,7 +2636,12 @@
                         if (key.replace(/县|市|区/g, '') === shortName) {
                             const pCity = countyToParentCity[key];
                             if (yunnanCityData[pCity]) {
-                                return { ...yunnanCityData[pCity], _source: 'fallback', _displayName: city, _parentCity: pCity };
+                                const data = { ...yunnanCityData[pCity], _source: 'fallback', _displayName: city, _parentCity: pCity };
+                                if (countyRealData[key]) {
+                                    data.population = countyRealData[key].population;
+                                    data.gdp = countyRealData[key].gdp;
+                                }
+                                return data;
                             }
                         }
                     }
