@@ -1005,20 +1005,41 @@
                                 <li>针对优秀案例录制销售复盘视频，全员学习。</li>
                             </ul>
                         </div>
-                        <div style="font-size:12px;color:#636e72;margin-bottom:10px;font-weight:600;">各导购优劣势分析及改进方法</div>
-                        <table class="salesperson-table">
-                            <thead><tr><th style="width:5%;">排名</th><th style="width:8%;">姓名</th><th style="width:10%;">销售额</th><th style="width:24%;">核心优势</th><th style="width:24%;">存在不足</th><th>改进方法</th></tr></thead>
+                        <div style="font-size:12px;color:#636e72;margin-bottom:10px;font-weight:600;">各导购详细效能数据</div>
+                        <div style="overflow-x:auto;">
+                        <table class="salesperson-table" style="min-width:900px;">
+                            <thead><tr>
+                                <th style="width:4%;text-align:center;">排名</th>
+                                <th style="width:7%;">姓名</th>
+                                <th style="width:9%;">销售额</th>
+                                <th style="width:6%;">小票</th>
+                                <th style="width:7%;">客单价</th>
+                                <th style="width:7%;">连带率</th>
+                                <th style="width:7%;">折扣率</th>
+                                <th style="width:8%;">新品占比</th>
+                                <th style="width:8%;">老品占比</th>
+                                <th style="width:17%;">核心优势</th>
+                                <th style="width:17%;">存在不足</th>
+                                <th>改进方法</th>
+                            </tr></thead>
                             <tbody>
                                 <tr v-for="(sp, idx) in salespersonData" :key="idx">
-                                    <td><span style="font-weight:bold;color:#ff6b00;">{{ idx + 1 }}</span></td>
+                                    <td style="text-align:center;"><span style="font-weight:bold;color:#ff6b00;">{{ idx + 1 }}</span></td>
                                     <td style="font-weight:600;">{{ sp.name }}</td>
                                     <td>¥{{ formatNumber(sp.total_amount) }}</td>
+                                    <td style="text-align:center;">{{ sp.tickets }}</td>
+                                    <td>¥{{ sp.avg_price.toFixed(0) }}</td>
+                                    <td>{{ sp.attachment.toFixed(2) }}</td>
+                                    <td :style="{color: sp.discount > 0.85 ? '#d63031' : sp.discount < 0.7 ? '#00b894' : '#636e72'}">{{ sp.discount > 0 ? (sp.discount * 100).toFixed(1) + '%' : '-' }}</td>
+                                    <td :style="{color: sp.new_ratio > 0.5 ? '#00b894' : sp.new_ratio < 0.3 ? '#d63031' : '#636e72'}">{{ (sp.new_ratio * 100).toFixed(0) }}%</td>
+                                    <td :style="{color: sp.old_ratio > 0.5 ? '#d63031' : '#636e72'}">{{ (sp.old_ratio * 100).toFixed(0) }}%</td>
                                     <td class="advantage-text">{{ sp.advantage }}</td>
                                     <td class="weakness-text">{{ sp.weakness }}</td>
                                     <td class="method-text">{{ sp.improvement }}</td>
                                 </tr>
                             </tbody>
                         </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -3645,10 +3666,18 @@
                     const salespersonMap = {};
                     data.forEach(r => {
                         const name = r['营业员'] || r['营业员.姓名'] || '未知';
-                        if (!salespersonMap[name]) salespersonMap[name] = { name, amount: 0, tickets: new Set(), qty: 0 };
+                        if (!salespersonMap[name]) salespersonMap[name] = { name, amount: 0, tickets: new Set(), qty: 0, standardAmount: 0, newAmount: 0, newQty: 0, oldAmount: 0, oldQty: 0, newTickets: new Set(), oldTickets: new Set() };
                         salespersonMap[name].amount += getAmount(r);
                         if (r['单据编号']) salespersonMap[name].tickets.add(r['单据编号']);
                         salespersonMap[name].qty += getQty(r);
+                        // 标准金额（用于计算折扣）
+                        const stdFields = ['标准金额', '吊牌价', '标准价', '原价', '吊牌金额'];
+                        for (const f of stdFields) { if (r[f] !== undefined && r[f] !== null && r[f] !== '') { salespersonMap[name].standardAmount += (parseFloat(r[f]) || 0); break; } }
+                        // 新品/老品区分
+                        const season = String(r['产品季'] || r['季节'] || '').toUpperCase();
+                        const isOld = season.includes('老品') || season.includes('旧');
+                        if (isOld) { salespersonMap[name].oldAmount += getAmount(r); salespersonMap[name].oldQty += getQty(r); if (r['单据编号']) salespersonMap[name].oldTickets.add(r['单据编号']); }
+                        else { salespersonMap[name].newAmount += getAmount(r); salespersonMap[name].newQty += getQty(r); if (r['单据编号']) salespersonMap[name].newTickets.add(r['单据编号']); }
                     });
                     
                     const salespersonList = Object.values(salespersonMap).map(sp => ({
@@ -3656,23 +3685,75 @@
                         total_amount: sp.amount,
                         tickets: sp.tickets.size,
                         avg_price: sp.tickets.size > 0 ? sp.amount / sp.tickets.size : 0,
-                        attachment: sp.tickets.size > 0 ? sp.qty / sp.tickets.size : 0
+                        attachment: sp.tickets.size > 0 ? sp.qty / sp.tickets.size : 0,
+                        discount: sp.standardAmount > 0 ? sp.amount / sp.standardAmount : 0,
+                        new_amount: sp.newAmount,
+                        new_ratio: sp.amount > 0 ? sp.newAmount / sp.amount : 0,
+                        new_qty: sp.newQty,
+                        new_tickets: sp.newTickets.size,
+                        old_amount: sp.oldAmount,
+                        old_ratio: sp.amount > 0 ? sp.oldAmount / sp.amount : 0,
+                        old_qty: sp.oldQty,
+                        old_tickets: sp.oldTickets.size,
+                        standardAmount: sp.standardAmount
                     })).sort((a, b) => b.total_amount - a.total_amount);
                     
+                    // 计算全员平均值
+                    const n = salespersonList.length;
+                    const avgAmount = n > 0 ? salespersonList.reduce((s, sp) => s + sp.total_amount, 0) / n : 0;
+                    const avgAttachment = n > 0 ? salespersonList.reduce((s, sp) => s + sp.attachment, 0) / n : 0;
+                    const avgPrice = n > 0 ? salespersonList.reduce((s, sp) => s + sp.avg_price, 0) / n : 0;
+                    const avgDiscount = n > 0 ? salespersonList.reduce((s, sp) => s + sp.discount, 0) / n : 0;
+                    const avgNewRatio = n > 0 ? salespersonList.reduce((s, sp) => s + sp.new_ratio, 0) / n : 0;
+                    
                     salespersonData.value = salespersonList.map((sp, idx) => {
-                        const avgAmount = salespersonList.reduce((sum, s) => sum + s.total_amount, 0) / salespersonList.length;
-                        const avgAttachment = salespersonList.reduce((sum, s) => sum + s.attachment, 0) / salespersonList.length;
-                        let advantage = '', weakness = '', improvement = '';
+                        let advantages = [], weaknesses = [], improvements = [];
                         
-                        if (idx === 0) { advantage = '销售额最高'; weakness = '注意保持'; improvement = '继续保持优势'; }
-                        else if (sp.total_amount > avgAmount * 1.2) { advantage = '销售额高于平均'; weakness = '连带率有提升空间'; improvement = '加强关联销售'; }
-                        else if (sp.total_amount < avgAmount * 0.6) { advantage = '待挖掘潜力'; weakness = '销售额低于平均'; improvement = '加强产品培训'; }
-                        else { advantage = '销售能力稳定'; weakness = '可提升客单价'; improvement = '学习优秀话术'; }
+                        // 1. 销售额维度
+                        if (idx === 0) { advantages.push('销售额排名第1'); }
+                        else if (sp.total_amount > avgAmount * 1.2) { advantages.push('销售额高于平均20%+'); }
+                        else if (sp.total_amount < avgAmount * 0.6) { weaknesses.push('销售额低于平均40%+'); improvements.push('建议加强产品知识和销售话术培训，跟班学习销冠的成交技巧'); }
                         
-                        if (sp.attachment > avgAttachment * 1.2) advantage += '，连带率高';
-                        else if (sp.attachment < avgAttachment * 0.8) weakness += '，连带率偏低';
+                        // 2. 连带率维度
+                        if (sp.attachment > avgAttachment * 1.2 && sp.attachment > 1.5) { advantages.push('连带率优秀(' + sp.attachment.toFixed(2) + ')'); }
+                        else if (sp.attachment < avgAttachment * 0.8 || sp.attachment < 1.2) {
+                            weaknesses.push('连带率偏低(' + sp.attachment.toFixed(2) + ')');
+                            improvements.push('加强关联推荐训练，掌握"鞋+服+配"成套搭配话术，结账时多问一句');
+                        }
                         
-                        return { ...sp, advantage, weakness, improvement };
+                        // 3. 客单价维度
+                        if (sp.avg_price > avgPrice * 1.2) { advantages.push('客单价高(¥' + sp.avg_price.toFixed(0) + ')'); }
+                        else if (sp.avg_price < avgPrice * 0.7) {
+                            weaknesses.push('客单价偏低(¥' + sp.avg_price.toFixed(0) + ')');
+                            improvements.push('重点推荐高单价商品(鞋类、外套)，避免只推低价引流款');
+                        }
+                        
+                        // 4. 折扣维度
+                        if (sp.discount > avgDiscount * 1.05 && sp.discount > 0.85) {
+                            weaknesses.push('折扣率偏高(' + (sp.discount * 100).toFixed(1) + '%)');
+                            improvements.push('减少打折依赖，强化价值感推荐，新品严格执行吊牌价销售');
+                        } else if (sp.discount > 0 && sp.discount < avgDiscount * 0.9 && sp.discount < 0.75) {
+                            advantages.push('折扣控制好(' + (sp.discount * 100).toFixed(1) + '%)');
+                        }
+                        
+                        // 5. 新品占比维度
+                        if (sp.new_ratio > avgNewRatio * 1.1 && sp.new_ratio > 0.5) { advantages.push('新品推得好(占比' + (sp.new_ratio * 100).toFixed(0) + '%)'); }
+                        else if (sp.new_ratio < avgNewRatio * 0.7 || sp.new_ratio < 0.3) {
+                            weaknesses.push('新品占比低(' + (sp.new_ratio * 100).toFixed(0) + '%)');
+                            improvements.push('优先熟悉当季新品卖点，主推新品提成更高，对顾客也有新鲜感');
+                        }
+                        
+                        // 补充：如果优势和不足都为空，给个默认
+                        if (advantages.length === 0) advantages.push('销售能力稳定');
+                        if (weaknesses.length === 0 && idx !== 0) { weaknesses.push('暂无明显短板'); improvements.push('保持优势，向销冠学习突破'); }
+                        if (idx === 0 && weaknesses.length === 0) { weaknesses.push('注意保持优势'); improvements.push('总结自身销售方法论，带教其他导购，输出标杆案例'); }
+                        
+                        return {
+                            ...sp,
+                            advantage: advantages.join('；'),
+                            weakness: weaknesses.join('；'),
+                            improvement: improvements.join('；')
+                        };
                     });
                 };
                 
