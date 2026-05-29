@@ -2712,7 +2712,7 @@
                         '性别': ['顾客性别', '目标性别'],
                         '季节': ['季节', '季度', '季别'],
                         '产品季': ['产品季', '产品季度', '年份季节'],
-                        '营业员': ['导购', '销售员', '店员', '营业代表'],
+                        '营业员': ['营业员.姓名', '导购', '销售员', '店员', '营业代表'],
                         '库存数量': ['库存数量', '库存', '当前库存', '可用库存', '可配数量'],
                         '库存牌额': ['库存牌额', '库存金额', '库存额', '库存价值'],
                         '尺寸': ['尺码', 'size', '规格'],
@@ -3644,7 +3644,7 @@
                     
                     const salespersonMap = {};
                     data.forEach(r => {
-                        const name = r['营业员'] || '未知';
+                        const name = r['营业员'] || r['营业员.姓名'] || '未知';
                         if (!salespersonMap[name]) salespersonMap[name] = { name, amount: 0, tickets: new Set(), qty: 0 };
                         salespersonMap[name].amount += getAmount(r);
                         if (r['单据编号']) salespersonMap[name].tickets.add(r['单据编号']);
