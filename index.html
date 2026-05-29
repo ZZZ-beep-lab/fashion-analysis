@@ -936,11 +936,11 @@
                         
                         <!-- 商品洞察框 -->
                         <div class="insight-box">
-                            <div class="insight-box-title">📌 商品问题深度剖析</div>
+                            <div class="insight-box-title">📌 商品结构速览</div>
                             <ul>
-                                <li><strong>销售结构</strong>：服装占比<span class="highlight">{{ (shopProducts.category?.find(c => c.大类 === '服装')?.本期占比 || 0).toFixed(0) }}%</span>，鞋类<span class="highlight">{{ (shopProducts.category?.find(c => c.大类 === '鞋')?.本期占比 || 0).toFixed(0) }}%</span>，配件<span class="highlight">{{ (shopProducts.category?.find(c => c.大类 === '配件')?.本期占比 || 0).toFixed(0) }}%</span>。</li>
-                                <li><strong>新品占比</strong>：新品销售占比<span :class="shopProducts.new_rate >= 50 ? 'good' : 'highlight'">{{ shopProducts.new_rate || 0 }}%</span>，老品占比{{ shopProducts.old_rate || 0 }}%。</li>
-                                <li v-if="shopInventory.has_data"><strong>库存库龄</strong>：库龄>1年的老品库存金额较大，需加速清仓。</li>
+                                <li><strong>品类占比</strong>：服装<span :class="(shopProducts.category?.find(c => c.大类 === '服装')?.本期占比 || 0) > 60 ? 'highlight' : 'good'">{{ (shopProducts.category?.find(c => c.大类 === '服装')?.本期占比 || 0).toFixed(0) }}%</span>，鞋类<span :class="(shopProducts.category?.find(c => c.大类 === '鞋')?.本期占比 || 0) < 25 ? 'highlight' : 'good'">{{ (shopProducts.category?.find(c => c.大类 === '鞋')?.本期占比 || 0).toFixed(0) }}%</span>，配件<span :class="(shopProducts.category?.find(c => c.大类 === '配件')?.本期占比 || 0) < 8 ? 'highlight' : 'good'">{{ (shopProducts.category?.find(c => c.大类 === '配件')?.本期占比 || 0).toFixed(0) }}%</span>。（健康值：服装<60%/鞋25-30%/配件8-12%）</li>
+                                <li><strong>新品占比</strong>：<span :class="shopProducts.new_rate >= 45 ? 'good' : 'highlight'">{{ shopProducts.new_rate || 0 }}%</span>（健康值≥45%），老品占比<span :class="shopProducts.old_rate <= 15 ? 'good' : 'highlight'">{{ shopProducts.old_rate || 0 }}%</span>（健康值≤15%）</li>
+                                <li v-if="shopInventory.has_data"><strong>库存库龄</strong>：库龄>1年的老品库存需加速清仓，每月持有成本约2-3%。</li>
                             </ul>
                         </div>
                         
@@ -966,11 +966,13 @@
                         
                         <!-- 陈列洞察框 -->
                         <div class="insight-box">
-                            <div class="insight-box-title">🖼️ 陈列问题与改进</div>
+                            <div class="insight-box-title">🖼️ 陈列优化方向</div>
                             <ul>
-                                <li>入口黄金区应优先陈列当季新品/爆款，提升进店转化。</li>
-                                <li>鞋类陈列应靠近试穿镜，增加试穿引导话术。</li>
-                                <li>配件区面积占比建议控制在8-12%，过高则坪效低。</li>
+                                <li v-if="(shopProducts.category?.find(c => c.大类 === '鞋')?.本期占比 || 0) < 25">⚠️ 鞋类占比偏低，建议将鞋类移至入口3米内黄金区，增加试穿镜</li>
+                                <li v-else>✅ 鞋类陈列位置合理，继续优化试穿引导话术</li>
+                                <li v-if="(shopProducts.category?.find(c => c.大类 === '配件')?.本期占比 || 0) < 8">⚠️ 配件占比偏低，收银台前设49-99元配件专区（袜子/护腕/头带）</li>
+                                <li v-else>✅ 配件陈列到位，保持收银台换购策略</li>
+                                <li>入口黄金区优先陈列当季新品/爆款，过季品移至店内侧折扣区</li>
                             </ul>
                         </div>
                         
@@ -997,12 +999,14 @@
                         
                         <!-- 营业员洞察框 -->
                         <div class="insight-box">
-                            <div class="insight-box-title">📊 营业员改进策略</div>
+                            <div class="insight-box-title">📊 营业员管理方向</div>
                             <ul>
-                                <li>实施「底薪+阶梯提成」，新品提成系数1.5倍，老品0.5倍。</li>
-                                <li>每日晨会搭配PK，每人输出3套全身方案，纳入考核。</li>
-                                <li>设置「连带王」和「大单之星」周奖/月奖。</li>
-                                <li>针对优秀案例录制销售复盘视频，全员学习。</li>
+                                <li v-if="avgSalespersonPrice < 280">⚠️ 平均客单价¥{{ avgSalespersonPrice.toFixed(0) }}低于健康线，重点培训高单价商品推荐话术</li>
+                                <li v-else>✅ 平均客单价达标，继续强化场景化推荐</li>
+                                <li v-if="salespersonData.length > 0 && salespersonData[0].total_amount / (salespersonData[salespersonData.length-1]?.total_amount || 1) > 2">⚠️ 销售额首尾差距超2倍，需针对性帮扶低绩效导购（复盘成交话术/搭配推荐）</li>
+                                <li v-else>✅ 导购间业绩差距可控，保持良性竞争氛围</li>
+                                <li>实施「底薪+阶梯提成」，新品提成系数1.5倍，老品0.5倍，激励导购主推新品</li>
+                                <li>设置「连带王」和「大单之星」周奖/月奖，树立标杆</li>
                             </ul>
                         </div>
                         <div style="font-size:12px;color:#636e72;margin-bottom:10px;font-weight:600;">各导购详细效能分析</div>
@@ -3978,8 +3982,66 @@
                 const generateAnalysis = () => {
                     if (!shopProducts.value.category?.length) { analysisData.value = null; return; }
                     const metrics = shopYoyData.value || {};
+                    const shopName = selectedShop.value || '本店';
                     
-                    // 生成城市市场分析
+                    // ========== 基础数据提取 ==========
+                    const attachmentRate = shopData.value.attachment_rate || 0;
+                    const discountRate = shopData.value.discount_rate || 0;
+                    const avgPrice = shopData.value.avg_customer_price || 0;
+                    const yoyGrowth = metrics.amount?.growth || 0;
+                    const tickets = shopData.value.tickets || 0;
+                    const totalAmount = shopData.value.total_amount || 0;
+                    
+                    const categoryData = shopProducts.value.category || [];
+                    const clothingCat = categoryData.find(c => c.大类 === '服装');
+                    const shoeCat = categoryData.find(c => c.大类 === '鞋');
+                    const accessoryCat = categoryData.find(c => c.大类 === '配件');
+                    const clothingRatio = clothingCat?.占比 || (clothingCat ? (clothingCat.本期销售额 / totalAmount * 100) : 0);
+                    const shoeRatio = shoeCat?.占比 || (shoeCat ? (shoeCat.本期销售额 / totalAmount * 100) : 0);
+                    const accessoryRatio = accessoryCat?.占比 || (accessoryCat ? (accessoryCat.本期销售额 / totalAmount * 100) : 0);
+                    const clothingAmount = clothingCat?.本期销售额 || 0;
+                    const shoeAmount = shoeCat?.本期销售额 || 0;
+                    const accessoryAmount = accessoryCat?.本期销售额 || 0;
+                    
+                    const newRate = shopProducts.value.new_rate || 0;
+                    const oldRate = shopProducts.value.old_rate || 0;
+                    
+                    const productSeason = shopProducts.value.product_season || [];
+                    const subclassData = shopProducts.value.subclass || [];
+                    const inventoryData = shopInventory.value || {};
+                    
+                    // 产品季分析
+                    let seasonQ2 = 0, seasonQ1 = 0, seasonQ4 = 0, seasonQ3 = 0, seasonOld = 0, seasonOther = 0;
+                    productSeason.forEach(s => {
+                        const season = String(s.产品季 || '').toUpperCase();
+                        const ratio = s.本期销售占比 || 0;
+                        if (season.includes('Q2') || season.includes('夏')) seasonQ2 += ratio;
+                        else if (season.includes('Q1') || season.includes('春')) seasonQ1 += ratio;
+                        else if (season.includes('Q4') || season.includes('冬')) seasonQ4 += ratio;
+                        else if (season.includes('Q3') || season.includes('秋')) seasonQ3 += ratio;
+                        else if (season.includes('老品') || season.includes('旧')) seasonOld += ratio;
+                        else seasonOther += ratio;
+                    });
+                    
+                    // 找出最依赖的产品季
+                    const seasonMap = [
+                        { name: '当季(Q2)', val: seasonQ2 },
+                        { name: '上季(Q1)', val: seasonQ1 },
+                        { name: 'Q4', val: seasonQ4 },
+                        { name: 'Q3', val: seasonQ3 },
+                        { name: '老品', val: seasonOld }
+                    ].filter(s => s.val > 0).sort((a, b) => b.val - a.val);
+                    
+                    // 找出TOP中类
+                    const topSubclass = subclassData.slice(0, 5).map(s => s.中类 || s.小类 || '').filter(Boolean);
+                    
+                    // 计算同比变化
+                    const yoyTicketsGrowth = metrics.tickets?.growth || 0;
+                    const yoyPriceGrowth = metrics.avg_price?.growth || 0;
+                    const yoyAttachGrowth = metrics.attachment?.growth || 0;
+                    const yoyDiscountGrowth = metrics.discount?.growth || 0;
+                    
+                    // ========== 一、市场维度 ==========
                     const city = currentCity.value;
                     const cityInfo = cityMarketData.value;
                     let marketProblems = [];
@@ -3987,326 +4049,536 @@
                     if (city && cityInfo) {
                         const myBrandCount = city361Count.value || 1;
                         const competitorCount = cityInfo.sports_brand_count;
+                        const population = cityInfo.population || 0;
+                        const gdp = cityInfo.gdp || 0;
                         
-                        // 市场集中度分析
-                        if (shopProducts.value.category.length > 0) {
-                            const topCategory = shopProducts.value.category.reduce((max, c) => 
-                                (c['本期销售额'] || 0) > (max['本期销售额'] || 0) ? c : max, shopProducts.value.category[0]);
-                            const topShare = topCategory ? ((topCategory['本期销售额'] / shopData.value.total_amount) * 100).toFixed(1) : 0;
+                        // 人均消费力与门店表现匹配度
+                        const perCapitaGDP = population > 0 ? (gdp / population) : 0;
+                        if (perCapitaGDP > 5 && avgPrice < 280) {
                             marketProblems.push({
-                                problem: `${topCategory?.大类 || '某品类'}销售占比${topShare}%，集中度${parseFloat(topShare) > 50 ? '偏高' : '合理'}`,
-                                suggestion: parseFloat(topShare) > 50 ? '建议适度分散品类风险' : '保持当前结构'
+                                problem: `${city}人均GDP ${perCapitaGDP.toFixed(1)}万元，消费力强，但${shopName}客单价仅¥${avgPrice.toFixed(0)}，未匹配市场消费水平`,
+                                suggestion: `当地消费力支撑¥350+客单价，建议主推中高端跑鞋/外套套装，当前客单价有¥${(350 - avgPrice).toFixed(0)}提升空间`
+                            });
+                        } else if (perCapitaGDP < 3 && avgPrice > 350) {
+                            marketProblems.push({
+                                problem: `${city}人均GDP仅${perCapitaGDP.toFixed(1)}万元，但${shopName}客单价¥${avgPrice.toFixed(0)}偏高，可能抑制客流`,
+                                suggestion: '当地价格敏感度高，建议增加200-300元价位带产品占比，用性价比吸引客流'
                             });
                         }
                         
-                        // 竞品分析
+                        // 品类结构与当地产业匹配
+                        if (cityInfo.industry) {
+                            const ind = cityInfo.industry;
+                            if ((ind.includes('旅游') || ind.includes('矿业') || ind.includes('农业')) && shoeRatio < 20) {
+                                marketProblems.push({
+                                    problem: `${city}以${ind}为主，户外/工作场景需求大，但${shopName}鞋类占比仅${shoeRatio.toFixed(1)}%，远低于25%健康线`,
+                                    suggestion: `当地消费者对功能鞋需求高，建议将鞋类占比提升至25-30%，重点引进徒步鞋/劳保鞋/运动凉鞋`
+                                });
+                            }
+                            if ((ind.includes('边境') || ind.includes('口岸') || ind.includes('贸易')) && accessoryRatio < 5) {
+                                marketProblems.push({
+                                    problem: `${city}为贸易口岸城市，流动客多，但配件占比仅${accessoryRatio.toFixed(1)}%，错失冲动消费机会`,
+                                    suggestion: '口岸门店应强化配件陈列，设置49-99元伴手礼专区，收割低决策成本的流动客群'
+                                });
+                            }
+                        }
+                        
+                        // 竞品密集度与应对策略
                         if (competitorCount > 15) {
                             marketProblems.push({
-                                problem: '竞品密集度高',
-                                suggestion: `城市有${competitorCount}家运动品牌，需差异化竞争`
+                                problem: `${city}有${competitorCount}家运动品牌，竞争白热化，${shopName}需找到差异化生存空间`,
+                                suggestion: `竞品密集区要打"服务差"——提高导购专业度（跑步/健身场景化推荐），并建立本地会员社群，用复购率对抗竞品分流`
+                            });
+                        } else if (competitorCount >= 8) {
+                            marketProblems.push({
+                                problem: `${city}有${competitorCount}家运动品牌，竞争中等偏上`,
+                                suggestion: '在竞品尚未完全渗透的细分品类（如儿童运动、女性瑜伽）上建立优势'
                             });
                         } else if (competitorCount < 8) {
                             marketProblems.push({
-                                problem: '市场教育空间大',
-                                suggestion: '运动品牌较少，潜在消费需求可挖掘'
+                                problem: `${city}仅${competitorCount}家运动品牌，市场教育空间大`,
+                                suggestion: `竞争不激烈=消费者品牌认知弱。建议做"品类教育者"：办跑步体验活动、运动穿搭课堂，先把蛋糕做大`
                             });
                         }
                         
-                        // 361°门店分析
+                        // 361°同品牌内耗
                         if (myBrandCount > 3) {
                             marketProblems.push({
-                                problem: `${city}已有${myBrandCount}家361°门店`,
-                                suggestion: '需确保单店效率，避免内部竞争'
+                                problem: `${city}已有${myBrandCount}家361°门店，${shopName}面临同品牌分流风险`,
+                                suggestion: `与同城其他361°店做差异化定位：如本店主打跑步品类，其他店主打篮球/综训，避免同款同价同陈列的内部消耗`
                             });
                         } else if (myBrandCount === 1) {
                             marketProblems.push({
-                                problem: '市场独占机会',
-                                suggestion: `建议评估开设第二店的可行性`
+                                problem: `${city}仅1家361°门店，市场独占但覆盖面有限`,
+                                suggestion: `独占=全城客流压在一家店，建议评估当地商圈分布，在第二商圈开设第二店抢占增量`
                             });
                         }
                         
-                        // 节日经济分析
+                        // 节日经济 - 具体化
                         if (cityInfo.festivals && cityInfo.festivals.length > 0) {
+                            const top2 = cityInfo.festivals.slice(0, 2).join('、');
                             marketProblems.push({
-                                problem: `当地特色节日：${cityInfo.festivals[0]}`,
-                                suggestion: '可作为促销节点，提前备货'
+                                problem: `${city}有${top2}等特色节庆，消费脉冲期明显`,
+                                suggestion: `提前2周备足节日场景商品（如泼水节→速干衣/凉鞋），设置节日限定套餐，节后清货用老品折扣回收现金流`
                             });
                         }
+                        
+                        // 市场集中度 - 更具体
+                        if (categoryData.length > 0) {
+                            const topCategory = categoryData.reduce((max, c) => 
+                                (c['本期销售额'] || 0) > (max['本期销售额'] || 0) ? c : max, categoryData[0]);
+                            const topShare = topCategory ? ((topCategory['本期销售额'] / totalAmount) * 100).toFixed(1) : 0;
+                            if (parseFloat(topShare) > 55) {
+                                marketProblems.push({
+                                    problem: `${topCategory?.大类}销售占比${topShare}%，品类集中度过高，季节性风险大`,
+                                    suggestion: `一旦${topCategory?.大类}过季，营收断崖式下跌。建议将第二品类占比提升至25%以上作为安全垫`
+                                });
+                            }
+                        }
                     } else {
                         marketProblems.push({
-                            problem: '品类集中度分析',
-                            suggestion: '关注各品类销售占比变化'
-                        });
-                        marketProblems.push({
-                            problem: '市场定位分析',
-                            suggestion: '适时调整产品结构'
+                            problem: '未匹配到城市市场数据，无法评估当地消费力与竞品格局',
+                            suggestion: '建议在店铺名称中加入城市/县区信息，以获取个性化市场分析'
                         });
                     }
                     
-                    // 生成零售深度诊断
-                    const attachmentRate = shopData.value.attachment_rate || 0;
-                    const discountRate = shopData.value.discount_rate || 0;
-                    const avgPrice = shopData.value.avg_customer_price || 0;
-                    const yoyGrowth = metrics.amount?.growth || 0;
-                    const tickets = shopData.value.tickets || 0;
+                    // ========== 二、零售维度：深度诊断 ==========
+                    const newProductRatio = seasonQ2;
+                    const oldProductRatio = seasonOld;
                     
-                    // 获取品类数据
-                    const categoryData = shopProducts.value.category || [];
-                    const clothingCat = categoryData.find(c => c.大类 === '服装');
-                    const shoeCat = categoryData.find(c => c.大类 === '鞋');
-                    const accessoryCat = categoryData.find(c => c.大类 === '配件');
-                    const clothingRatio = clothingCat?.占比 || (clothingCat ? (clothingCat.本期销售额 / shopData.value.total_amount * 100) : 0);
-                    const shoeRatio = shoeCat?.占比 || (shoeCat ? (shoeCat.本期销售额 / shopData.value.total_amount * 100) : 0);
-                    const accessoryRatio = accessoryCat?.占比 || (accessoryCat ? (accessoryCat.本期销售额 / shopData.value.total_amount * 100) : 0);
-                    
-                    // 获取新品/老品占比
-                    const newRate = shopProducts.value.new_rate || 0;
-                    const oldRate = shopProducts.value.old_rate || 0;
-                    
-                    // 获取各产品季占比，用于判断折扣是否合理
-                    const productSeason = shopProducts.value.product_season || [];
-                    const seasonRatio = {
-                        q2: 0,      // 当季新品（上市0-3个月）→ 应95折以上
-                        q1: 0,      // 上季（上市3-6个月）→ 应85折以上
-                        q4: 0,      // 上上季（上市6-9个月）→ 应75折以上
-                        q3: 0,      // 上市9-12个月
-                        older: 0,   // 上市超过1年
-                        oldProduct: 0 // 老品（过季）→ 折扣不低于65折
-                    };
-                    productSeason.forEach(s => {
-                        const season = String(s.产品季 || '').toUpperCase();
-                        const ratio = s.本期销售占比 || 0;
-                        // 使用includes匹配，支持"Q2"、"26Q2"、"2026Q2"、"夏季"等多种格式
-                        if (season.includes('Q2') || season.includes('夏')) {
-                            seasonRatio.q2 += ratio;
-                        } else if (season.includes('Q1') || season.includes('春')) {
-                            seasonRatio.q1 += ratio;
-                        } else if (season.includes('Q4') || season.includes('冬')) {
-                            seasonRatio.q4 += ratio;
-                        } else if (season.includes('Q3') || season.includes('秋')) {
-                            seasonRatio.q3 += ratio;
-                        } else if (season.includes('老品') || season.includes('旧')) {
-                            seasonRatio.oldProduct += ratio;
-                        } else {
-                            seasonRatio.older += ratio;
-                        }
-                    });
-                    
-                    // 构建诊断文本 - 更深入的分析
                     let diagnosisHtml = '';
                     
-                    // 1. 连带率深度诊断
-                    if (attachmentRate < 1.5) {
-                        const lostRevenue = tickets * (1.8 - attachmentRate) * avgPrice * 0.3; // 估算损失
-                        diagnosisHtml += `<p><strong>1️⃣ 连带率仅${attachmentRate.toFixed(2)}件/单，每月流失约¥${(lostRevenue * 30).toFixed(0)}潜在收入</strong><br>
-                        &nbsp;&nbsp;📌 根因分析：约${Math.round((1 - attachmentRate/1.8) * 100)}%的小票是"单件成交"，导购缺乏「鞋+服+配」成套推荐话术。<br>
-                        &nbsp;&nbsp;📌 数据支撑：当前${tickets}张小票，如果连带率提升到1.8，可增加${Math.round(tickets * (1.8 - attachmentRate))}件商品销售。<br>
-                        &nbsp;&nbsp;📌 竞品对比：安踏/李宁同级别门店连带率普遍在1.8-2.2区间，我们落后明显。</p>`;
+                    // 找出本店最核心的1-2个问题（按严重程度排序）
+                    const issues = [];
+                    
+                    // 连带率诊断 - 区间化分析
+                    if (attachmentRate < 1.3) {
+                        const singleTicketRatio = Math.round((1 / attachmentRate - 0.3) * 100); // 估算单件小票占比
+                        const lostItems = Math.round(tickets * (1.8 - attachmentRate));
+                        const lostRevenue = lostItems * avgPrice * 0.4; // 保守估算损失
+                        issues.push({ 
+                            severity: 3, 
+                            html: `<p><strong>1️⃣ 连带率仅${attachmentRate.toFixed(2)}，严重偏低⚠️</strong><br>
+                            &nbsp;&nbsp;📌 约${singleTicketRatio}%的小票只买了1件商品，导购几乎没有做「加购推荐」。<br>
+                            &nbsp;&nbsp;📌 量化损失：${tickets}张小票×平均每单少${(1.8 - attachmentRate).toFixed(1)}件 = 月流失约${lostItems}件/¥${(lostRevenue).toFixed(0)}。<br>
+                            &nbsp;&nbsp;📌 对比：行业健康值1.8-2.2，${shopName}落后${((1.8 - attachmentRate) / 1.8 * 100).toFixed(0)}%。</p>`
+                        });
                     } else if (attachmentRate < 1.8) {
-                        diagnosisHtml += `<p><strong>1️⃣ 连带率${attachmentRate.toFixed(2)}件/单，距离健康值还有${((1.8 - attachmentRate) / 1.8 * 100).toFixed(0)}%提升空间</strong><br>
-                        &nbsp;&nbsp;📌 主要问题：配件销售占比仅${accessoryRatio.toFixed(1)}%，收银台缺乏"随手买"陈列。<br>
-                        &nbsp;&nbsp;📌 改进方向：重点训练导购"结账时多问一句"，预计连带率可提升0.2-0.3。</p>`;
-                    }
-                    
-                    // 2. 折扣率深度诊断 - 基于产品季判断
-                    // 规则：新品1个月内≥95折，1个月后≥85折，2个月后≥75折，3个月后<75折正常，老品≥65折
-                    const newProductRatio = seasonRatio.q2; // 当季Q2新品
-                    const oneMonthRatio = seasonRatio.q1;   // Q1（上市3-6个月）
-                    const twoMonthRatio = seasonRatio.q4;   // Q4（上市6-9个月）
-                    const threeMonthRatio = seasonRatio.q3 + seasonRatio.older; // Q3及更老
-                    const oldProductRatio = seasonRatio.oldProduct; // 老品
-                    
-                    // 计算理论合理折扣率（加权平均）
-                    // Q2应≥95%，Q1应≥85%，Q4应≥75%，Q3可<75%，老品应≥65%
-                    let expectedMinDiscount = 0;
-                    let expectedMaxDiscount = 1.0;
-                    if (newProductRatio > 0) expectedMinDiscount += newProductRatio * 0.95;
-                    if (oneMonthRatio > 0) expectedMinDiscount += oneMonthRatio * 0.85;
-                    if (twoMonthRatio > 0) expectedMinDiscount += twoMonthRatio * 0.75;
-                    if (threeMonthRatio > 0) expectedMinDiscount += threeMonthRatio * 0.65; // Q3及更老可以更低
-                    if (oldProductRatio > 0) {
-                        expectedMinDiscount += oldProductRatio * 0.65;
-                        expectedMaxDiscount = Math.min(expectedMaxDiscount, 0.95); // 有老品时，整体折扣不应超过95折
-                    }
-                    
-                    // 折扣率判断
-                    if (newProductRatio >= 50) {
-                        // 当季新品为主（≥50%）
-                        if (discountRate >= 0.95) {
-                            diagnosisHtml += `<p><strong>2️⃣ 折扣率${(discountRate * 100).toFixed(1)}%，正常✅</strong></p>`;
-                        } else if (discountRate >= 0.85) {
-                            diagnosisHtml += `<p><strong>2️⃣ 折扣率${(discountRate * 100).toFixed(1)}%，新品占比${newProductRatio.toFixed(0)}%，存在轻微折扣</strong><br>
-                            &nbsp;&nbsp;📌 建议：确保新品上市30天内不打折，仅会员可享95折。</p>`;
-                        } else {
-                            diagnosisHtml += `<p><strong>2️⃣ 折扣率仅${(discountRate * 100).toFixed(1)}%，新品占比${newProductRatio.toFixed(0)}%，新品打折过狠⚠️</strong><br>
-                            &nbsp;&nbsp;📌 建议：严格执行新品正价政策，会员最多95折。</p>`;
-                        }
-                    } else if (oldProductRatio >= 30) {
-                        // 老品较多（≥30%）
-                        if (discountRate >= 0.85) {
-                            diagnosisHtml += `<p><strong>2️⃣ 折扣率${(discountRate * 100).toFixed(1)}%，老品占比${oldProductRatio.toFixed(0)}%，清货力度不足⚠️</strong><br>
-                            &nbsp;&nbsp;📌 建议：过季老品应主动降价促销，最低不低于65折。</p>`;
-                        } else if (discountRate < 0.65) {
-                            diagnosisHtml += `<p><strong>2️⃣ 折扣率仅${(discountRate * 100).toFixed(1)}%，打折过狠⚠️</strong><br>
-                            &nbsp;&nbsp;📌 建议：老品最低65折，严禁"买一送一"等极端促销。</p>`;
-                        } else {
-                            diagnosisHtml += `<p><strong>2️⃣ 折扣率${(discountRate * 100).toFixed(1)}%，正常✅</strong></p>`;
-                        }
+                        const gap = (1.8 - attachmentRate).toFixed(2);
+                        issues.push({
+                            severity: 2,
+                            html: `<p><strong>1️⃣ 连带率${attachmentRate.toFixed(2)}，距健康值差${gap}</strong><br>
+                            &nbsp;&nbsp;📌 配件占比仅${accessoryRatio.toFixed(1)}%，收银台缺少「顺手买」商品。<br>
+                            &nbsp;&nbsp;📌 提升路径：训练导购结账时推荐配件（袜子/护腕），预计连带率可提升0.2-0.3。</p>`
+                        });
                     } else {
-                        // 混合销售
-                        if (discountRate >= 0.85) {
-                            diagnosisHtml += `<p><strong>2️⃣ 折扣率${(discountRate * 100).toFixed(1)}%，正常✅</strong></p>`;
-                        } else if (discountRate >= 0.75) {
-                            diagnosisHtml += `<p><strong>2️⃣ 折扣率${(discountRate * 100).toFixed(1)}%，正常✅</strong></p>`;
-                        } else if (discountRate >= 0.65) {
-                            diagnosisHtml += `<p><strong>2️⃣ 折扣率${(discountRate * 100).toFixed(1)}%，正常✅</strong></p>`;
-                        } else {
-                            diagnosisHtml += `<p><strong>2️⃣ 折扣率仅${(discountRate * 100).toFixed(1)}%，打折过狠⚠️</strong><br>
-                            &nbsp;&nbsp;📌 问题：折扣低于65折，即使老品也不应打这么狠。<br>
-                            &nbsp;&nbsp;📌 建议：最低折扣不低于65折，保护品牌价值和毛利。</p>`;
-                        }
+                        issues.push({
+                            severity: 0,
+                            html: `<p><strong>1️⃣ 连带率${attachmentRate.toFixed(2)}，达标✅</strong></p>`
+                        });
                     }
                     
-                    // 3. 客单价深度诊断
-                    if (avgPrice < 250) {
-                        diagnosisHtml += `<p><strong>3️⃣ 客单价¥${avgPrice.toFixed(0)}，低于行业均值¥280</strong><br>
-                        &nbsp;&nbsp;📌 根因分析：高单价商品（鞋类、外套）销售占比低，导购主推低价单品。<br>
-                        &nbsp;&nbsp;📌 数据对比：鞋类占比${shoeRatio.toFixed(1)}%（健康值25-30%），服装占比${clothingRatio.toFixed(1)}%。<br>
-                        &nbsp;&nbsp;📌 机会点：如果鞋类占比提升5个百分点，客单价预计可提升¥30-50。</p>`;
+                    // 折扣率诊断 - 结合产品季结构
+                    if (newProductRatio >= 50 && discountRate < 0.85) {
+                        const leakedMargin = totalAmount * (1 - discountRate) * 0.15; // 估算毛利损失
+                        issues.push({
+                            severity: 3,
+                            html: `<p><strong>2️⃣ 折扣率${(discountRate * 100).toFixed(1)}%，新品占比${newProductRatio.toFixed(0)}%却大幅打折⚠️</strong><br>
+                            &nbsp;&nbsp;📌 新品是毛利最高的时候，过早打折直接损失利润。估算月毛利流失¥${(leakedMargin).toFixed(0)}。<br>
+                            &nbsp;&nbsp;📌 根因：导购为成交主动降价，或促销活动把新品也纳入折扣范围。<br>
+                            &nbsp;&nbsp;📌 建议：新品上市30天内严格执行正价，违规打折扣提成。</p>`
+                        });
+                    } else if (oldProductRatio >= 30 && discountRate >= 0.85) {
+                        issues.push({
+                            severity: 2,
+                            html: `<p><strong>2️⃣ 折扣率${(discountRate * 100).toFixed(1)}%，老品占比${oldProductRatio.toFixed(0)}%却几乎不打折⚠️</strong><br>
+                            &nbsp;&nbsp;📌 老品不打折=占用库存=占用资金。每月库存持有成本约为库存金额的2-3%。<br>
+                            &nbsp;&nbsp;📌 建议：过季老品7-85折清货，最低65折，腾出资金和陈列位给新品。</p>`
+                        });
+                    } else if (discountRate < 0.65) {
+                        issues.push({
+                            severity: 3,
+                            html: `<p><strong>2️⃣ 折扣率仅${(discountRate * 100).toFixed(1)}%，远低于65折底线⚠️</strong><br>
+                            &nbsp;&nbsp;📌 即使是清仓老品也不应低于65折，否则严重侵蚀品牌价值和毛利。<br>
+                            &nbsp;&nbsp;📌 根因：缺乏折扣审批机制，导购随意打折促成交。<br>
+                            &nbsp;&nbsp;📌 紧急管控：导购≤85折，店长≤75折，区域经理≤65折，越级需审批。</p>`
+                        });
+                    } else if (discountRate >= 0.85 && newProductRatio < 30 && oldProductRatio < 20) {
+                        issues.push({
+                            severity: 0,
+                            html: `<p><strong>2️⃣ 折扣率${(discountRate * 100).toFixed(1)}%，管控良好✅</strong></p>`
+                        });
+                    } else {
+                        issues.push({
+                            severity: 1,
+                            html: `<p><strong>2️⃣ 折扣率${(discountRate * 100).toFixed(1)}%，${newProductRatio > 30 ? '新品占比' + newProductRatio.toFixed(0) + '%需关注折扣' : oldProductRatio > 20 ? '老品占比' + oldProductRatio.toFixed(0) + '%可适度清货' : '整体尚可'}</strong></p>`
+                        });
                     }
                     
-                    // 4. 品类结构深度诊断
-                    if (clothingRatio > 70) {
-                        diagnosisHtml += `<p><strong>4️⃣ 品类集中度风险：服装占比${clothingRatio.toFixed(1)}%</strong><br>
-                        &nbsp;&nbsp;📌 风险：服装季节性强，一旦过季积压严重。鞋类周转更稳定，配件毛利高。<br>
-                        &nbsp;&nbsp;📌 陈列问题：鞋类陈列位置偏后，试穿镜数量不足，影响销售。<br>
-                        &nbsp;&nbsp;📌 改进：将鞋类调整到入口黄金位，增加试穿引导话术。</p>`;
+                    // 客单价诊断 - 结合品类结构
+                    if (avgPrice < 220) {
+                        issues.push({
+                            severity: 3,
+                            html: `<p><strong>3️⃣ 客单价¥${avgPrice.toFixed(0)}，严重偏低⚠️</strong><br>
+                            &nbsp;&nbsp;📌 低于¥220说明导购以推低价单品为主，缺乏「场景化搭配推荐」能力。<br>
+                            &nbsp;&nbsp;📌 品类数据：鞋类占比${shoeRatio.toFixed(1)}%（健康值25-30%），配件${accessoryRatio.toFixed(1)}%（健康值8-12%）。<br>
+                            &nbsp;&nbsp;📌 机会：如果鞋类占比提升至25%，按当前鞋类均价估算，客单价可提升¥${(shoeRatio < 25 ? (25 - shoeRatio) * avgPrice * 0.02 : 0).toFixed(0)}-80。</p>`
+                        });
+                    } else if (avgPrice < 280) {
+                        issues.push({
+                            severity: 2,
+                            html: `<p><strong>3️⃣ 客单价¥${avgPrice.toFixed(0)}，低于¥280健康线</strong><br>
+                            &nbsp;&nbsp;📌 鞋类占比${shoeRatio.toFixed(1)}%（${shoeRatio < 25 ? '偏低，是拖低客单价的主因' : '正常'}），配件${accessoryRatio.toFixed(1)}%。<br>
+                            &nbsp;&nbsp;📌 如果连带率从${attachmentRate.toFixed(2)}提升到1.8，客单价自然上升¥${((1.8 - attachmentRate) * avgPrice * 0.3).toFixed(0)}。</p>`
+                        });
+                    } else if (avgPrice >= 280 && avgPrice < 350) {
+                        issues.push({
+                            severity: 0,
+                            html: `<p><strong>3️⃣ 客单价¥${avgPrice.toFixed(0)}，达标✅</strong></p>`
+                        });
+                    } else {
+                        issues.push({
+                            severity: 0,
+                            html: `<p><strong>3️⃣ 客单价¥${avgPrice.toFixed(0)}，优秀🌟</strong></p>`
+                        });
                     }
                     
-                    // 构建策略建议 - 更具体
+                    // 同比趋势诊断
+                    if (yoyGrowth < -10) {
+                        issues.push({
+                            severity: 3,
+                            html: `<p><strong>4️⃣ 销售额同比下滑${Math.abs(yoyGrowth).toFixed(1)}%，需紧急干预⚠️</strong><br>
+                            &nbsp;&nbsp;📌 拆解：客流${yoyTicketsGrowth >= 0 ? '增长' + yoyTicketsGrowth.toFixed(1) + '%' : '下降' + Math.abs(yoyTicketsGrowth).toFixed(1) + '%'}，客单价${yoyPriceGrowth >= 0 ? '增长' + yoyPriceGrowth.toFixed(1) + '%' : '下降' + Math.abs(yoyPriceGrowth).toFixed(1) + '%'}。<br>
+                            &nbsp;&nbsp;📌 ${yoyTicketsGrowth < 0 ? '客流下滑是主因，优先做引流（地推/社群/异业合作）' : '客单价/连带率下滑是主因，优先做导购培训和连带激励'}。</p>`
+                        });
+                    } else if (yoyGrowth < 0) {
+                        issues.push({
+                            severity: 1,
+                            html: `<p><strong>4️⃣ 销售额同比小幅下滑${Math.abs(yoyGrowth).toFixed(1)}%</strong><br>
+                            &nbsp;&nbsp;📌 ${yoyTicketsGrowth < yoyPriceGrowth ? '客流降但客单提升，说明客单价策略有效但需要引流' : '需关注连带率和折扣率变化'}。</p>`
+                        });
+                    } else if (yoyGrowth > 15) {
+                        issues.push({
+                            severity: 0,
+                            html: `<p><strong>4️⃣ 销售额同比增长${yoyGrowth.toFixed(1)}%，势头良好🌟</strong><br>
+                            &nbsp;&nbsp;📌 ${yoyTicketsGrowth > yoyPriceGrowth ? '增长主要靠客流拉动，注意维护客户体验' : '增长主要靠客单价/连带提升，策略有效继续保持'}。</p>`
+                        });
+                    }
+                    
+                    // 品类集中度风险
+                    if (clothingRatio > 65) {
+                        issues.push({
+                            severity: 2,
+                            html: `<p><strong>5️⃣ 服装占比${clothingRatio.toFixed(1)}%，品类集中度偏高</strong><br>
+                            &nbsp;&nbsp;📌 风险：服装季节性强，换季时营收断崖。鞋类周转更稳定（年周转3-4次 vs 服装2-3次），配件毛利高（60%+ vs 服装40-50%）。<br>
+                            &nbsp;&nbsp;📌 目标：鞋类提升至25%+，配件提升至8%+，服装控制在60%以内。</p>`
+                        });
+                    } else if (shoeRatio > 45) {
+                        issues.push({
+                            severity: 1,
+                            html: `<p><strong>5️⃣ 鞋类占比${shoeRatio.toFixed(1)}%，偏高</strong><br>
+                            &nbsp;&nbsp;📌 鞋类客单高但试穿成本高（1对1服务），高峰时段可能成为瓶颈。<br>
+                            &nbsp;&nbsp;📌 建议：确保服装/配件陈列位不被压缩，维持进店后的浏览动线。</p>`
+                        });
+                    }
+                    
+                    // 按严重度排序输出诊断
+                    issues.sort((a, b) => b.severity - a.severity);
+                    diagnosisHtml = issues.map(i => i.html).join('');
+                    
+                    // ========== 三、零售策略：深度个性化 ==========
                     const strategies = [];
                     
-                    if (attachmentRate < 1.8) {
+                    // 连带率策略 - 根据程度不同给出不同方案
+                    if (attachmentRate < 1.3) {
                         strategies.push({
-                            title: '🏆 连带率提升',
+                            title: '🏆 连带率紧急提升（当前' + attachmentRate.toFixed(2) + '→目标1.5）',
                             items: [
-                                '推行「两件奖5元，三件奖12元」连带专项激励',
-                                '每日晨会5分钟搭配PK，每人输出3套全身搭配方案',
-                                '设置「连带王」月度评选，奖金+荣誉公示'
+                                `实施阶梯激励：2件+5元/单，3件+12元/单，4件以上+20元/单，本周张贴公告`,
+                                `每单必须尝试推荐1件加购品（袜子¥49/护腕¥59/头带¥39），不推荐不扣分但推荐了有额外1元/单`,
+                                `每日晨会通报昨日连带冠军，月度评选「连带王」奖200元`
+                            ]
+                        });
+                    } else if (attachmentRate < 1.8) {
+                        strategies.push({
+                            title: '🏆 连带率进阶提升（当前' + attachmentRate.toFixed(2) + '→目标1.8）',
+                            items: [
+                                `收银台设置49-79元配件专区（袜子/护腕/头带），结账时自然推荐`,
+                                `导购话术升级：从"您还需要什么"改为"搭配这双鞋的速干T我们刚到新款"`,
+                                `晨会5分钟搭配PK，每人输出1套场景化搭配方案（跑步/健身/休闲）`
                             ]
                         });
                     }
                     
-                    // 折扣策略 - 根据产品季结构精准建议
+                    // 折扣策略 - 精准到店铺数据
                     if (newProductRatio >= 50 && discountRate < 0.95) {
-                        // 当季新品为主但打折
                         strategies.push({
-                            title: '💰 新品折扣保护',
+                            title: '💰 新品折扣保护（新品占比' + newProductRatio.toFixed(0) + '%却打了' + (discountRate * 100).toFixed(0) + '折）',
                             items: [
-                                '新品上市首月严格执行正价/会员95折',
-                                '禁止导购对上市<30天的新品打折',
-                                '滞销新品调价需店长审批'
+                                `新品上市30天内正价出售，仅会员享95折——严格执行，违规打折扣提成`,
+                                `收银台张贴「新品不打折」提示卡，减少顾客议价`,
+                                `滞销新品超30天未动，由店长审批后统一调价，禁止导购自行打折`
                             ]
                         });
                     } else if (oldProductRatio >= 30 && discountRate >= 0.85) {
-                        // 老品多但打折少
                         strategies.push({
-                            title: '💰 老品清货加速',
+                            title: '💰 老品清货加速（老品占比' + oldProductRatio.toFixed(0) + '%却仅打' + (discountRate * 100).toFixed(0) + '折）',
                             items: [
-                                '设置"折扣专区"，老品统一陈列',
-                                '过季老品65-85折清货，不低于65折',
-                                '每周跟踪老品周转率，滞销款调价'
+                                `设置「折扣专区」，过季老品7-85折统一陈列，最低65折底线`,
+                                `每周统计老品销售占比，目标：老品占比从${oldProductRatio.toFixed(0)}%降至15%以内`,
+                                `老品清出资金和陈列位，替换为当季新品`
                             ]
                         });
                     } else if (discountRate < 0.65) {
-                        // 打折太深（低于65折）
                         strategies.push({
-                            title: '💰 折扣底线管控',
+                            title: '💰 折扣底线管控（当前' + (discountRate * 100).toFixed(0) + '折，低于65折红线）',
                             items: [
-                                '最低折扣不低于65折，保护品牌价值',
-                                '导购≤85折，店长≤75折，区域经理≤65折',
-                                '严禁"买一送一"等极端促销'
+                                `立即建立折扣审批：导购≤85折，店长≤75折，区域经理≤65折`,
+                                `低于75折的交易必须店长签字确认，收银台放置折扣审批单`,
+                                `严禁「买一送一」「全场5折」等极端促销`
                             ]
                         });
                     }
                     
-                    if (clothingRatio > 70) {
-                        strategies.push({
-                            title: '👕 品类结构优化',
-                            items: [
-                                '鞋类陈列移至入口黄金区，增加试穿引导',
-                                '配件采用「满额换购」策略（满299元+15元换购）',
-                                '每周分析TOP10滞销品类，调整陈列位置'
-                            ]
-                        });
-                    }
-                    
+                    // 客单价策略 - 结合品类结构
                     if (avgPrice < 280) {
+                        const priceGap = (280 - avgPrice).toFixed(0);
                         strategies.push({
-                            title: '💵 客单价突破',
+                            title: '💵 客单价提升¥' + priceGap + '（当前¥' + avgPrice.toFixed(0) + '→目标¥280）',
                             items: [
-                                '主推「运动场景套装」（上衣+裤装+鞋），定价350-500元',
-                                '会员专享：满300减30，刺激高客单',
-                                '配件收银台陈列，结账时主动推荐'
+                                `主推场景化套装：跑步套装（跑鞋+速干T+运动裤¥350-500）> 健身套装 > 休闲套装`,
+                                `${shoeRatio < 25 ? '鞋类占比仅' + shoeRatio.toFixed(1) + '%，将鞋类调至入口黄金区，增加试穿引导' : '鞋类占比正常，重点做鞋+服搭配推荐'}`,
+                                `${accessoryRatio < 8 ? '配件占比仅' + accessoryRatio.toFixed(1) + '%，收银台设49-99元换购区（满299+15元换购）' : '配件占比正常，持续优化陈列'}`
                             ]
                         });
                     }
                     
-                    // 构建可落地的行动计划
+                    // 品类结构策略
+                    if (clothingRatio > 65) {
+                        strategies.push({
+                            title: '👕 品类结构再平衡（服装' + clothingRatio.toFixed(0) + '%→目标<60%）',
+                            items: [
+                                `鞋类从当前位置移至入口3米内黄金区，增加1面全身镜提升试穿率`,
+                                `配件收银台陈列+满额换购（满299+15元换购袜子/护腕）`,
+                                `每周分析TOP10滞销品类，及时调整陈列位置和促销策略`
+                            ]
+                        });
+                    }
+                    
+                    // 同比下滑策略
+                    if (yoyGrowth < -5) {
+                        strategies.push({
+                            title: '📉 止跌策略（同比下滑' + Math.abs(yoyGrowth).toFixed(1) + '%）',
+                            items: [
+                                `${yoyTicketsGrowth < 0 ? '客流下滑是主因：地推发传单引流+社群裂变（老客带新客享9折）+异业合作（健身房/瑜伽馆交叉引流）' : '客单价/连带率下滑是主因：加强导购搭配话术培训+连带激励'}`,
+                                `设置「会员日」（每月8号/18号/28号双倍积分），提升复购频次`,
+                                `竞品调研：走访周边安踏/李宁门店，了解促销策略和畅销款`
+                            ]
+                        });
+                    }
+                    
+                    // ========== 四、行动计划：店铺专属 ==========
                     const actionPlan = [];
                     
-                    // 第一周行动 - 根据实际问题精准安排
-                    if (newProductRatio >= 50 && discountRate < 0.95) {
-                        // 当季新品为主但打折
+                    // 找出最紧急的问题，优先安排行动
+                    const urgentIssues = issues.filter(i => i.severity >= 2);
+                    
+                    if (urgentIssues.length > 0) {
+                        // 第一个行动 - 解决最严重的问题
+                        const topIssue = urgentIssues[0];
+                        if (attachmentRate < 1.5 && issues.some(i => i.html.includes('连带率'))) {
+                            const targetRate = attachmentRate < 1.3 ? 1.5 : 1.8;
+                            actionPlan.push({
+                                title: `连带率专项攻坚（${attachmentRate.toFixed(2)}→${targetRate}）`,
+                                detail: `${shopName}当前连带率${attachmentRate.toFixed(2)}，${tickets}张小票中约${Math.round(tickets * (2 - attachmentRate) / 2)}张是单件成交。制定阶梯激励：2件+5元，3件+12元，4件+20元。每日晨会通报昨日连带冠军，收银台张贴激励海报。目标：两周内连带率提升至${targetRate}。`,
+                                timeline: '本周内发布'
+                            });
+                        } else if (discountRate < 0.65) {
+                            actionPlan.push({
+                                title: '折扣底线管控紧急执行',
+                                detail: `${shopName}折扣率${(discountRate * 100).toFixed(1)}%，低于65折红线。立即执行：导购≤85折，店长≤75折，区域经理≤65折。收银台放置折扣审批单，每单记录。违反扣提成。`,
+                                timeline: '今日起执行'
+                            });
+                        } else if (newProductRatio >= 50 && discountRate < 0.95) {
+                            actionPlan.push({
+                                title: '新品折扣保护落地',
+                                detail: `${shopName}新品占比${newProductRatio.toFixed(0)}%却打了${(discountRate * 100).toFixed(0)}折。制定新品30天保护期，违规打折扣提成。收银台张贴「新品不打折」提示卡。`,
+                                timeline: '本周内发布'
+                            });
+                        } else if (oldProductRatio >= 30 && discountRate >= 0.85) {
+                            actionPlan.push({
+                                title: '老品清货专项',
+                                detail: `${shopName}老品占比${oldProductRatio.toFixed(0)}%但几乎不打折。梳理老品清单，设置折扣专区，7-85折清货。目标：4周内老品占比降至15%。`,
+                                timeline: '本周内启动'
+                            });
+                        } else if (yoyGrowth < -10) {
+                            actionPlan.push({
+                                title: '销售止跌紧急行动',
+                                detail: `${shopName}同比下滑${Math.abs(yoyGrowth).toFixed(1)}%，${yoyTicketsGrowth < 0 ? '客流是主因，启动地推引流+社群运营' : '客单价/连带率是主因，加强导购培训'}。设置会员日（双倍积分），走访竞品了解市场动态。`,
+                                timeline: '本周内启动'
+                            });
+                        } else if (avgPrice < 250) {
+                            actionPlan.push({
+                                title: '客单价提升专项',
+                                detail: `${shopName}客单价¥${avgPrice.toFixed(0)}，低于¥280健康线。主推场景化套装（跑步/健身/休闲），鞋类调至黄金区增加试穿，配件收银台换购。目标：4周内客单价提升至¥280。`,
+                                timeline: '本周内启动'
+                            });
+                        }
+                    }
+                    
+                    // 陈列调整 - 根据品类结构定制
+                    if (clothingRatio > 55 || shoeRatio < 25 || accessoryRatio < 8) {
                         actionPlan.push({
-                            title: '新品折扣保护机制',
-                            detail: `制定新品保护规则：上市30天内的新品禁止打折，会员可享95折。在收银台张贴"新品不打折"提示卡，导购若违规打折扣除相应提成。`,
-                            timeline: '本周内发布'
-                        });
-                    } else if (oldProductRatio >= 30 && discountRate >= 0.85) {
-                        // 老品清货不足
-                        actionPlan.push({
-                            title: '老品清货专项行动',
-                            detail: `梳理老品库存清单，过季老品统一贴"特价"标签，设置门店折扣专区。老品促销价65-85折，最低不低于65折。每周统计老品销售占比。`,
-                            timeline: '本周内启动'
-                        });
-                    } else if (discountRate < 0.65) {
-                        // 打折太深
-                        actionPlan.push({
-                            title: '折扣底线管控',
-                            detail: `建立折扣权限底线：导购≤85折，店长≤75折，区域经理≤65折。所有低于75折的交易必须店长签字确认。制作"折扣审批单"放在收银台，每单记录。`,
-                            timeline: '本周内完成'
+                            title: '陈列布局优化',
+                            detail: `${shoeRatio < 25 ? '鞋类占比仅' + shoeRatio.toFixed(1) + '%，将鞋类从当前位置移至入口3米内黄金区，增加1面全身镜。' : ''}${accessoryRatio < 8 ? '配件占比仅' + accessoryRatio.toFixed(1) + '%，收银台前设49-99元配件专区（袜子/护腕/头带），方便顺手拿。' : ''}${clothingRatio > 60 ? '服装占比' + clothingRatio.toFixed(0) + '%，压缩非核心陈列位，给鞋类和配件腾出空间。' : ''}`,
+                            timeline: '下周完成'
                         });
                     }
                     
-                    if (attachmentRate < 1.8) {
+                    // 导购培训 - 根据薄弱环节定制
+                    if (attachmentRate < 1.8 || avgPrice < 280) {
+                        const weakPoints = [];
+                        if (attachmentRate < 1.5) weakPoints.push('连带推荐话术');
+                        if (attachmentRate >= 1.5 && attachmentRate < 1.8) weakPoints.push('配件加购话术');
+                        if (avgPrice < 250) weakPoints.push('高单价商品推荐信心');
+                        if (shoeRatio < 20) weakPoints.push('鞋类试穿引导');
                         actionPlan.push({
-                            title: '启动连带率专项激励',
-                            detail: `制定激励方案：两件+5元/单，三件+12元/单，四件以上+20元/单。打印激励海报贴在员工休息室，每天晨会通报昨日连带冠军。`,
-                            timeline: '本周内发布'
+                            title: '导购能力专项培训',
+                            detail: `${shopName}薄弱环节：${weakPoints.join('、')}。整理3套场景搭配模板：①跑步（跑鞋+速干T+运动裤¥350-500）②健身（训练鞋+紧身衣+短裤）③休闲（板鞋+卫衣+束脚裤）。每天晨会抽1人演练，${attachmentRate < 1.5 ? '重点练加购话术' : '重点练场景化推荐'}。`,
+                            timeline: '两周内完成培训'
                         });
                     }
                     
-                    // 第二周行动
-                    actionPlan.push({
-                        title: '调整陈列布局',
-                        detail: `将鞋类从当前位置移至入口3米内黄金区，增加1面全身镜。收银台前设置"配件专区"，摆放袜子、护腕、头带，单价49-79元，方便顺手拿。`,
-                        timeline: '下周完成'
-                    });
-                    
-                    // 第三周行动
-                    actionPlan.push({
-                        title: '导购话术培训',
-                        detail: `整理3套高频搭配话术模板：①跑步场景（跑鞋+速干T+运动裤）②健身场景（训练鞋+紧身衣+短裤）③休闲场景（板鞋+卫衣+束脚裤）。每天晨会抽1人演练。`,
-                        timeline: '两周内完成培训'
-                    });
-                    
-                    // 持续行动
+                    // 数据复盘机制
                     actionPlan.push({
                         title: '每周数据复盘',
-                        detail: `每周一上午召开15分钟数据复盘会，重点看：连带率变化、折扣率分布、TOP10滞销品。用数据倒逼执行，连续两周不达标的项目立即调整策略。`,
+                        detail: `每周一上午15分钟复盘会，重点看：${urgentIssues.some(i => i.html.includes('连带率')) ? '连带率变化' : ''}${urgentIssues.some(i => i.html.includes('折扣')) ? '折扣率分布' : ''}${urgentIssues.some(i => i.html.includes('同比')) ? '同比趋势' : ''}TOP10滞销品。用数据倒逼执行，连续两周不达标的项目立即调整策略。`,
                         timeline: '持续执行'
                     });
+                    
+                    // ========== 五、商品维度：深度问题诊断 ==========
+                    const productProblems = [];
+                    
+                    // 产品季结构问题
+                    if (seasonMap.length > 0) {
+                        const topSeason = seasonMap[0];
+                        if (topSeason.val > 60) {
+                            productProblems.push({
+                                problem: `${topSeason.name}销售占比${topSeason.val.toFixed(0)}%，过度集中`,
+                                analysis: `一旦${topSeason.name}过季或断货，营收将断崖式下跌。健康的结构应该是当季50%+上季30%+老品20%`,
+                                suggestion: `加订${topSeason.name}畅销款的同时，主动引进其他产品季货品做补充，目标：最大占比不超过50%`
+                            });
+                        }
+                        if (seasonOld > 25) {
+                            productProblems.push({
+                                problem: `老品销售占比${seasonOld.toFixed(0)}%，库存老化严重`,
+                                analysis: `老品占比超过25%意味着近1/4的销售额靠过季商品，利润低且占用陈列资源。${shopName}老品销售额约¥${(totalAmount * seasonOld / 100).toFixed(0)}`,
+                                suggestion: `设置老品专区7-85折清货，4周内将老品占比降至15%以下。清出的陈列位给新品，新品毛利高出15-20%`
+                            });
+                        }
+                    }
+                    
+                    // 新品/老品占比问题
+                    if (newRate < 30) {
+                        productProblems.push({
+                            problem: `新品销售占比仅${newRate.toFixed(0)}%，远低于50%健康线`,
+                            analysis: `新品是利润引擎，占比低于30%说明${shopName}严重依赖老品清货模式，长期不可持续`,
+                            suggestion: `向区域申请增加新品配货，同时加速老品清货腾出陈列位。目标：新品占比提升至45%以上`
+                        });
+                    } else if (newRate > 70) {
+                        productProblems.push({
+                            problem: `新品销售占比${newRate.toFixed(0)}%，结构偏新`,
+                            analysis: `新品占比过高意味着没有过渡性产品，一旦新品断码容易形成销售空窗`,
+                            suggestion: `保持一定上季产品做过渡（20-25%），确保新品断码时有替代品可推`
+                        });
+                    }
+                    
+                    // 品类结构问题
+                    if (shoeRatio < 20 && shoeAmount > 0) {
+                        productProblems.push({
+                            problem: `鞋类销售占比仅${shoeRatio.toFixed(1)}%，低于25%健康线`,
+                            analysis: `鞋类是客单价引擎（均价通常高于服装），占比过低直接拖低客单价。${shopName}服装¥${(clothingAmount / 1000).toFixed(0)}k vs 鞋类¥${(shoeAmount / 1000).toFixed(0)}k`,
+                            suggestion: `增加鞋类SKU深度（跑鞋/训练鞋/板鞋各3-5个码），将鞋类陈列移至黄金位，增加试穿镜和导购引导`
+                        });
+                    }
+                    if (accessoryRatio < 5 && accessoryAmount >= 0) {
+                        productProblems.push({
+                            problem: `配件占比仅${accessoryRatio.toFixed(1)}%，连带率提升的关键品类缺失`,
+                            analysis: `配件是「顺手买」品类，客单价低（49-99元）但毛利高（60%+），且能直接提升连带率`,
+                            suggestion: `收银台设置配件专区（袜子/护腕/头带/运动包），导购结账时推荐，目标配件占比提升至8-12%`
+                        });
+                    }
+                    
+                    // 库存问题
+                    if (inventoryData.has_data && inventoryData.grouped?.length) {
+                        const oldStock = inventoryData.grouped.find(g => g.库龄分类?.includes('1年') || g.库龄分类?.includes('老品'));
+                        if (oldStock) {
+                            productProblems.push({
+                                problem: `库龄>1年老品库存积压`,
+                                analysis: `老品库存占用资金和陈列位，每月持有成本约2-3%。如不清货，越久越贬值`,
+                                suggestion: `制定4周清货计划：第1周85折，第2周75折，第3周7折，第4周打包出清。最低65折`
+                            });
+                        }
+                    }
+                    
+                    // 如果没有明显问题，给一个正面评价
+                    if (productProblems.length === 0) {
+                        productProblems.push({
+                            problem: '商品结构整体健康',
+                            analysis: '各品类占比合理，新品老品比例适当',
+                            suggestion: '持续关注每周数据变化，及时微调'
+                        });
+                    }
+                    
+                    // ========== 六、陈列维度：深度诊断 ==========
+                    const displayProblems = [];
+                    
+                    // 基于品类占比的陈列建议
+                    if (clothingRatio > 60) {
+                        displayProblems.push({
+                            problem: `服装占比${clothingRatio.toFixed(0)}%，陈列面积可能过大`,
+                            analysis: `服装陈列面积过大→鞋类和配件被压缩→顾客浏览动线以服装为主→客单价提升空间受限`,
+                            suggestion: `压缩服装陈列至60%面积，腾出空间给鞋类（25%面积）和配件（10%面积+收银台专区），剩余5%做促销堆头`
+                        });
+                    }
+                    if (shoeRatio < 25) {
+                        displayProblems.push({
+                            problem: `鞋类占比${shoeRatio.toFixed(1)}%，陈列位置可能偏后`,
+                            analysis: `鞋类试穿率高（约70%进店顾客会看鞋），如果陈列位置偏后，顾客容易错过。试穿→成交转化率约30%，是连带提升的关键入口`,
+                            suggestion: `将鞋墙/鞋架调整至入口3米内黄金区，增加1面全身镜，导购主动递鞋试穿`
+                        });
+                    }
+                    if (accessoryRatio < 8) {
+                        displayProblems.push({
+                            problem: `配件占比${accessoryRatio.toFixed(1)}%，陈列位不足`,
+                            analysis: `配件是低决策成本品类（49-99元），顾客「顺手买」概率高。没有专门的陈列位=没有连带提升的抓手`,
+                            suggestion: `收银台前设配件专区（袜子¥49/护腕¥59/头带¥39/运动包¥99），结账时导购自然推荐。墙面挂钩式陈列，不占地面面积`
+                        });
+                    }
+                    
+                    // 产品季陈列
+                    if (newRate > 40) {
+                        displayProblems.push({
+                            problem: `新品占比${newRate.toFixed(0)}%，需重点展示`,
+                            analysis: `新品是利润最高的时候，如果陈列不突出，顾客注意不到，导购也不会主动推`,
+                            suggestion: `入口处设「新品到店」专区，使用新品标识牌+主题陈列，每周更新。过季产品移至店内侧`
+                        });
+                    } else if (oldRate > 20) {
+                        displayProblems.push({
+                            problem: `老品占比${oldRate.toFixed(0)}%，需清仓陈列`,
+                            analysis: `老品如果和新品混放，顾客分不清，可能影响新品正价销售`,
+                            suggestion: `设独立折扣专区，明码标价（如「7折区」「85折区」），与新品陈列区分开。折扣区放店内侧，新品放黄金位`
+                        });
+                    }
+                    
+                    // 如果没有明显陈列问题
+                    if (displayProblems.length === 0) {
+                        displayProblems.push({
+                            problem: '陈列结构整体合理',
+                            analysis: '各品类陈列比例与销售占比基本匹配',
+                            suggestion: '持续优化动线，保持入口区新品更新频率'
+                        });
+                    }
                     
                     analysisData.value = {
                         market: { problems: marketProblems },
@@ -4315,8 +4587,8 @@
                             strategies: strategies,
                             actionPlan: actionPlan
                         },
-                        product: { problems: [{ problem: '产品季结构', analysis: '关注各季占比', suggestion: '及时调整产品结构' }, { problem: '库存结构', analysis: '关注周转率', suggestion: '避免库存积压' }] },
-                        display: { problems: [{ problem: '陈列位置', analysis: '高销量品类优先', suggestion: '优化陈列布局' }, { problem: '色彩搭配', analysis: '视觉吸引', suggestion: '采用渐变色系' }] }
+                        product: { problems: productProblems },
+                        display: { problems: displayProblems }
                     };
                 };
                 
